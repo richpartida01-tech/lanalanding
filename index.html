@@ -546,7 +546,7 @@ footer{background:var(--ink2);padding:60px 40px 32px}
         <div class="pci"><span class="pci-y">✓</span> 1 usuario asesor</div>
         <div class="pci" style="opacity:.45"><span class="pci-n">✗</span> FlowShop y OC por proveedor</div>
       </div>
-      <button class="btn-pc btn-pc-g" onclick="openDemo()">Probar gratis →</button>
+      <button class="btn-pc btn-pc-g" onclick="openRegistro('basico')">Probar gratis 15 días →</button>
     </div>
     <div class="pc featured">
       <div class="pc-badge">⭐ MÁS POPULAR</div>
@@ -560,7 +560,7 @@ footer{background:var(--ink2);padding:60px 40px 32px}
         <div class="pci"><span class="pci-y">✓</span> OC automática por proveedor</div>
         <div class="pci"><span class="pci-y">✓</span> Hasta 5 usuarios asesores</div>
       </div>
-      <button class="btn-pc btn-pc-p" onclick="openDemo()">Probar gratis →</button>
+      <button class="btn-pc btn-pc-p" onclick="openRegistro('pro')">Probar gratis 15 días →</button>
     </div>
     <div class="pc">
       <div class="pc-name">Empresarial</div>
@@ -652,6 +652,146 @@ footer{background:var(--ink2);padding:60px 40px 32px}
   <iframe id="demo-iframe" src="lana-demo.html"></iframe>
 </div>
 
+<!-- REGISTRO MODAL -->
+<div id="registro-overlay" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(9,9,15,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:20px;padding:40px;width:100%;max-width:440px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.2)">
+    <button onclick="closeRegistro()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#9898B2;line-height:1">✕</button>
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:44px;height:44px;background:#5B2FD4;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 14px">🧵</div>
+      <div style="font-family:'Urbanist',sans-serif;font-weight:900;font-size:22px;color:#09090F">Empieza gratis 15 días</div>
+      <div id="reg-plan-badge" style="display:inline-block;margin-top:6px;background:#EDE9FE;color:#5B2FD4;font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px;font-family:'Urbanist',sans-serif"></div>
+    </div>
+
+    <div id="reg-form">
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;color:#9898B2;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'Urbanist',sans-serif">Nombre del taller</div>
+        <input id="reg-nombre" type="text" placeholder="Ej: Bordados García" style="width:100%;border:1.5px solid #E4E4EE;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;font-family:'Instrument Sans',sans-serif;transition:border .2s" onfocus="this.style.borderColor='#5B2FD4'" onblur="this.style.borderColor='#E4E4EE'">
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;color:#9898B2;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'Urbanist',sans-serif">Email</div>
+        <input id="reg-email" type="email" placeholder="tu@taller.com" style="width:100%;border:1.5px solid #E4E4EE;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;font-family:'Instrument Sans',sans-serif;transition:border .2s" onfocus="this.style.borderColor='#5B2FD4'" onblur="this.style.borderColor='#E4E4EE'">
+      </div>
+      <div style="margin-bottom:24px">
+        <div style="font-size:11px;font-weight:700;color:#9898B2;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'Urbanist',sans-serif">Contraseña</div>
+        <input id="reg-pass" type="password" placeholder="Mínimo 8 caracteres" style="width:100%;border:1.5px solid #E4E4EE;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;font-family:'Instrument Sans',sans-serif;transition:border .2s" onfocus="this.style.borderColor='#5B2FD4'" onblur="this.style.borderColor='#E4E4EE'">
+      </div>
+      <div id="reg-error" style="display:none;background:#FEF2F2;color:#DC2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px"></div>
+      <button onclick="handleRegistro()" id="reg-btn" style="width:100%;background:#5B2FD4;color:white;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Urbanist',sans-serif;transition:all .2s">
+        Crear mi cuenta gratis →
+      </button>
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:#9898B2">Sin tarjeta requerida · 15 días gratis · Cancela cuando quieras</div>
+    </div>
+
+    <div id="reg-loading" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:32px;margin-bottom:12px">⏳</div>
+      <div style="font-family:'Urbanist',sans-serif;font-weight:700;color:#09090F">Creando tu cuenta...</div>
+      <div style="font-size:13px;color:#9898B2;margin-top:6px">Esto toma unos segundos</div>
+    </div>
+
+    <div id="reg-success" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:48px;margin-bottom:16px">🎉</div>
+      <div style="font-family:'Urbanist',sans-serif;font-weight:900;font-size:20px;color:#09090F;margin-bottom:8px">¡Tu cuenta está lista!</div>
+      <div style="font-size:14px;color:#52526A;margin-bottom:24px">Tienes 15 días de acceso completo.<br>Redirigiendo a tu panel...</div>
+      <div style="background:#F0FDF4;border-radius:10px;padding:12px;font-size:13px;color:#166534">✓ Cuenta creada · ✓ Trial activado · ✓ Panel listo</div>
+    </div>
+  </div>
+</div>
+
+<!-- SUPABASE SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase init
+const SUPA_URL = 'https://lgjdzaqjrmmzyrenevfm.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnamR6YXFqcm1tenlyZW5ldmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjE3MjIsImV4cCI6MjA5NDI5NzcyMn0.hMwcuvEqNN7DglKj5pCSn9vWgfze5BrvO5JbBecju-Y';
+let sb = null;
+try{ sb = window.supabase.createClient(SUPA_URL, SUPA_KEY); }catch(e){ console.warn('Supabase no disponible'); }
+
+let regPlan = 'pro';
+
+function openRegistro(plan){
+  regPlan = plan || 'pro';
+  const badges = {basico:'Plan Básico — $599 MXN/mes', pro:'Plan Pro — $999 MXN/mes'};
+  document.getElementById('reg-plan-badge').textContent = badges[regPlan] || badges.pro;
+  document.getElementById('reg-form').style.display = 'block';
+  document.getElementById('reg-loading').style.display = 'none';
+  document.getElementById('reg-success').style.display = 'none';
+  document.getElementById('reg-error').style.display = 'none';
+  document.getElementById('reg-nombre').value = '';
+  document.getElementById('reg-email').value = '';
+  document.getElementById('reg-pass').value = '';
+  document.getElementById('registro-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(()=>document.getElementById('reg-nombre').focus(), 100);
+}
+
+function closeRegistro(){
+  document.getElementById('registro-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function handleRegistro(){
+  const nombre = document.getElementById('reg-nombre').value.trim();
+  const email  = document.getElementById('reg-email').value.trim();
+  const pass   = document.getElementById('reg-pass').value.trim();
+  const errEl  = document.getElementById('reg-error');
+
+  errEl.style.display = 'none';
+
+  if(!nombre){ errEl.textContent='Ingresa el nombre de tu taller.'; errEl.style.display='block'; return; }
+  if(!email || !email.includes('@')){ errEl.textContent='Ingresa un email válido.'; errEl.style.display='block'; return; }
+  if(pass.length < 8){ errEl.textContent='La contraseña debe tener al menos 8 caracteres.'; errEl.style.display='block'; return; }
+  if(!sb){ errEl.textContent='Error de conexión. Intenta de nuevo.'; errEl.style.display='block'; return; }
+
+  document.getElementById('reg-form').style.display = 'none';
+  document.getElementById('reg-loading').style.display = 'block';
+
+  try{
+    // 1. Crear usuario en Supabase Auth
+    const {data:authData, error:authError} = await sb.auth.signUp({email, password:pass});
+    if(authError) throw new Error(authError.message);
+
+    const userId = authData.user.id;
+    const trialEnd = new Date(Date.now() + 15*24*60*60*1000).toISOString();
+    const slug = nombre.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').slice(0,40);
+
+    // 2. Crear tenant
+    const {data:tenant, error:tErr} = await sb.from('tenants').insert({
+      slug: slug + '-' + Math.random().toString(36).slice(2,6),
+      nombre: nombre,
+      plan: regPlan,
+      lana_url: 'https://get-lana.com/admin.html',
+      trial_ends_at: trialEnd,
+      config_json: {},
+    }).select().single();
+    if(tErr) throw new Error('Error creando tenant: ' + tErr.message);
+
+    // 3. Crear registro de usuario
+    const {error:uErr} = await sb.from('usuarios').insert({
+      nombre: nombre,
+      password: '',
+      rol: 'admin',
+      activo: true,
+      tenant_id: tenant.id,
+      auth_id: userId,
+    });
+    if(uErr) throw new Error('Error registrando usuario: ' + uErr.message);
+
+    // 4. Mostrar éxito y redirigir
+    document.getElementById('reg-loading').style.display = 'none';
+    document.getElementById('reg-success').style.display = 'block';
+    setTimeout(()=>{ window.location.href = 'https://get-lana.com/admin.html'; }, 2500);
+
+  }catch(e){
+    document.getElementById('reg-loading').style.display = 'none';
+    document.getElementById('reg-form').style.display = 'block';
+    errEl.textContent = e.message || 'Error inesperado. Intenta de nuevo.';
+    errEl.style.display = 'block';
+  }
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeRegistro(); });
+</script>
+
 <script>
 // Demo
 function openDemo(){
@@ -663,7 +803,7 @@ function closeDemo(){
   document.getElementById('demo-overlay').style.display='none';
   document.body.style.overflow='';
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDemo()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){ closeDemo(); closeRegistro(); }});
 
 // Scroll reveal
 const obs=new IntersectionObserver(entries=>{
