@@ -750,7 +750,11 @@ async function handleRegistro(){
     const {data:authData, error:authError} = await sb.auth.signUp({email, password:pass});
     if(authError) throw new Error(authError.message);
 
-    const userId = authData.user.id;
+    // 2. Activar sesión inmediatamente
+    const {data:signInData, error:signInError} = await sb.auth.signInWithPassword({email, password:pass});
+    if(signInError) throw new Error(signInError.message);
+
+    const userId = signInData.user.id;
     const trialEnd = new Date(Date.now() + 15*24*60*60*1000).toISOString();
     const slug = nombre.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').slice(0,40);
 
