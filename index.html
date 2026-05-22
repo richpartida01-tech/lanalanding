@@ -750,35 +750,16 @@ async function handleRegistro(){
     const {data:authData, error:authError} = await sb.auth.signUp({email, password:pass});
     if(authError) throw new Error(authError.message);
 
-    // 2. Activar sesión inmediatamente
+    // 2. Activar sesión
     const {data:signInData, error:signInError} = await sb.auth.signInWithPassword({email, password:pass});
     if(signInError) throw new Error(signInError.message);
 
-    const userId = signInData.user.id;
-    const trialEnd = new Date(Date.now() + 15*24*60*60*1000).toISOString();
-    const slug = nombre.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').slice(0,40);
-
-    // 2. Crear tenant
-    const {data:tenant, error:tErr} = await sb.from('tenants').insert({
-      slug: slug + '-' + Math.random().toString(36).slice(2,6),
-      nombre: nombre,
-      plan: regPlan,
-      lana_url: 'https://get-lana.com/admin.html',
-      trial_ends_at: trialEnd,
-      config_json: {},
-    }).select().single();
-    if(tErr) throw new Error('Error creando tenant: ' + tErr.message);
-
-    // 3. Crear registro de usuario
-    const {error:uErr} = await sb.from('usuarios').insert({
-      nombre: nombre,
-      password: '',
-      rol: 'admin',
-      activo: true,
-      tenant_id: tenant.id,
-      auth_id: userId,
+    // 3. Crear tenant + usuario via función privilegiada
+    const {data:tenantId, error:rpcErr} = await sb.rpc('register_tenant', {
+      p_nombre: nombre,
+      p_plan:   regPlan
     });
-    if(uErr) throw new Error('Error registrando usuario: ' + uErr.message);
+    if(rpcErr) throw new Error('Error creando cuenta: ' + rpcErr.message);
 
     // 4. Mostrar éxito y redirigir
     document.getElementById('reg-loading').style.display = 'none';
