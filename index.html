@@ -689,10 +689,10 @@ footer{background:var(--ink2);padding:60px 40px 32px}
     </div>
 
     <div id="reg-success" style="display:none;text-align:center;padding:10px 0">
-      <div style="font-size:48px;margin-bottom:16px">🎉</div>
-      <div style="font-family:'Urbanist',sans-serif;font-weight:900;font-size:20px;color:#09090F;margin-bottom:8px">¡Tu cuenta está lista!</div>
-      <div style="font-size:14px;color:#52526A;margin-bottom:24px">Tienes 15 días de acceso completo.<br>Redirigiendo a tu panel...</div>
-      <div style="background:#F0FDF4;border-radius:10px;padding:12px;font-size:13px;color:#166534">✓ Cuenta creada · ✓ Trial activado · ✓ Panel listo</div>
+      <div style="font-size:48px;margin-bottom:16px">📧</div>
+      <div style="font-family:'Urbanist',sans-serif;font-weight:900;font-size:20px;color:#09090F;margin-bottom:8px">Revisa tu correo</div>
+      <div style="font-size:14px;color:#52526A;margin-bottom:24px">Te enviamos un link de confirmación a tu email.<br>Haz clic en él para activar tu cuenta y entrar a LANA.</div>
+      <div style="background:#F0FDF4;border-radius:10px;padding:12px;font-size:13px;color:#166534">✓ Cuenta creada · Confirma tu email para continuar</div>
     </div>
   </div>
 </div>
@@ -750,21 +750,13 @@ async function handleRegistro(){
     const {data:authData, error:authError} = await sb.auth.signUp({email, password:pass});
     if(authError) throw new Error(authError.message);
 
-    // 2. Activar sesión
-    const {data:signInData, error:signInError} = await sb.auth.signInWithPassword({email, password:pass});
-    if(signInError) throw new Error(signInError.message);
+    // 2. Guardar datos del tenant para después de confirmar email
+    localStorage.setItem('lana_pending_nombre', nombre);
+    localStorage.setItem('lana_pending_plan', regPlan);
 
-    // 3. Crear tenant + usuario via función privilegiada
-    const {data:tenantId, error:rpcErr} = await sb.rpc('register_tenant', {
-      p_nombre: nombre,
-      p_plan:   regPlan
-    });
-    if(rpcErr) throw new Error('Error creando cuenta: ' + rpcErr.message);
-
-    // 4. Mostrar éxito y redirigir
+    // 3. Mostrar mensaje de confirmación — no redirigir hasta que confirme
     document.getElementById('reg-loading').style.display = 'none';
     document.getElementById('reg-success').style.display = 'block';
-    setTimeout(()=>{ window.location.href = 'https://get-lana.com/admin.html'; }, 2500);
 
   }catch(e){
     document.getElementById('reg-loading').style.display = 'none';
